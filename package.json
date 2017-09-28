@@ -1,0 +1,14 @@
+{
+  "name": "rembot",
+  "version": "1.0.0",
+  "description": "REMBOT",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "SnarkSlayer",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^11.2.1"
+  }
+}
