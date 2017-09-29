@@ -18,5 +18,7 @@ exports.run = function(client, message, args) {
 
         // Actually sends the message, yay.
         client.channels.get(server[0]).send(message);
+    } else {
+        message.channel.send(`Rem says no!  ${message.author}`)
     }
 };
