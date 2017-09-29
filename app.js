@@ -7,7 +7,7 @@ require('./util/eventLoader')(client)
 client.on("message", message => {
     for (var name = 0; i < (words.rem).length; name++) {
         for (var word = 0; i < (words.bad).length; word++) {
-            insult = `${name} is ${word}`
+            insult = `${words.rem[name]} is ${words.bad[word]}`
             if ((message.content).toLowerCase() === insult){
                 message.reply('LIES!')
         }
