@@ -1,5 +1,5 @@
-const settings = require('../config.json')
+const settings = require('../config.json');
 
 module.exports = client => {
-    console.log('REMBOT is Coming Back!')
+    console.log('REMBOT is Coming Back!');
 }

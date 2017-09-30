@@ -1,5 +1,5 @@
-const settings = require('../config.json')
+const settings = require('../config.json');
 
 module.exports = client => {
-    console.log('Bye, Bye REMBOT')
+    console.log('Bye, Bye REMBOT');
 }
