@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const config = require('./config.json');
-const words = require('./wordbank.json');
+const words = require('./databases/wordbank.json');
 require('./util/eventLoader')(client);
 
 client.on("message", message => {
@@ -11,7 +11,7 @@ client.on("message", message => {
         if (msg.indexOf(words.rem[name]) > -1) {
             for (var word = 0; word < (words.bad).length && check; word++) {
                 if (msg.indexOf(words.bad[word]) > -1) {
-                    if (msg.indexOf("not") == -1 && msg.indexOf("isn't") == -1 && msg.indexOf("Remu*") == -1) {
+                    if (msg.indexOf("not") == -1 && msg.indexOf("isn't") == -1 && msg.indexOf("^") == -1) {
                         message.reply('LIES!');
                         check = false;
                     }
