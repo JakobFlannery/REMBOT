@@ -27,25 +27,23 @@ exports.run = function (client, message, args) {
 
     if (profanity(message.author) === 1) {
         console.log('PERVERT!');
-        message.channel.send(`WHAT LEWD INTENTIONS DO YOU HAVE IN MIND??!!! ${message.author}`)
+        message.channel.send(`WHAT PERVERTED INTENTIONS DO YOU HAVE IN MIND??!!! ${message.author}\nI REFUSE!`)
     } else if (profanity(message.author) === 2) {
         fsearch = fetch(param);
         randomPuppy(fsearch)
         .then(url => {
             console.log(url);
-            message.channel.send(`${message.author} requested a Random Picture from ${fsearch}:`);
+            message.channel.send(`${message.author} requested a Random Picture from ${fsearch}:\n${url}`);
             if (fsearch != param) {
                 console.log(`Framed ${message.author}`);
-                message.channel.send('... What are you trying to pull? ... Fine, if you insist:');
+                message.channel.send(`... What are you trying to pull? ... Fine, if you insist:\n${url}`);
             }
-            message.channel.send(url)
         })
     } else {
         randomPuppy(param)
         .then(url => {
             console.log(url);
-            message.channel.send(`${message.author} requested a Random Picture from ${param}:`);
-            message.channel.send(url)
+            message.channel.send(`${message.author} requested a Random Picture from ${param}:\n${url}`);
         })
     }
 }
