@@ -5,10 +5,10 @@ const chalk = require('chalk');
 
 exports.run = function(client, message, args) {
     if (message.author == settings.adminid) {
-        console.log(chalk.bgRed('Wiped all User Coin Data!'));
+        console.log(chalk.bgRed('Wiped Pedo Count!'));
         for (var username = 0; username < (userlist.users).length; username++) {
             let newUserData = user[userlist.users[username]];
-            newUserData.coins = 0;
+            newUserData.pervertcount = 0;
         }
     }
 }

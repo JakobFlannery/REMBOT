@@ -20,7 +20,7 @@ function picture(msg){
     for (var victim = 0; victim < (blacklist.victims).length; victim++){
         if (blacklist.victims[victim] == msg) {
             xxx = false;
-            var sub = userlist.nsfw[(Math.floor(Math.random()*(userlist.nsfw).length())];
+            var sub = userlist.nsfw[(Math.floor(Math.random()*(userlist.nsfw).length()))];
             randomPuppy(sub)
             .then(url => {
                 console.log(url);
@@ -74,13 +74,13 @@ client.on("message", message => {
     if (!user[message.author.id])
     {
         user[message.author.id] = {"coins": 0, "streak": 0, "pervertcount": 0/*, etc*/};
-        userlist[users].push(message.author.id);
+        userlist.users[(userlist.users).length()] = message.author.id;
     }
     let userData = user[message.author.id];
     userData.coins += 1; // Gain 1 point per message
 })
 
-//Manages message streak count and message count
+//Manages message streak count and message count. *Can also affect 'pervertcount'
 client.on("message", message => {
     let userData = user[message.author.id];
     userData.streak += 1;
@@ -89,17 +89,20 @@ client.on("message", message => {
             for (var username = 0; username < (userlist.users).length; username++){
                 let newUserData = user[userlist.users[username]];
                 if (user[userlist.users[username]] != message.author.id) {
-                    newUserData.coins -= 1;
+                    if (newUserData.coins > 0)
+                    {newUserData.coins -= 1;}
                     newUserData.streak = 0;
+                    if ((Math.floor(Math.random()*(newUserData.pervertcount)) < (newUserData.pervertcount / (newUserData.pervertcount / Math.pow(newUserData.pervertcount, 2) * 200))) && (newUserData.pervertcount > 0))
+                    {newUserData.pervertcount -= 1;}
                 }
             }
         }
     }
 //Messages a link or such if user meets the criteria
     if (userData.coins > 10) {
-        if (Math.floor(Math.random()*(userData.streak / userData.streak**2 * 20)) == 1) {
+        if (Math.floor(Math.random()*(userData.streak / Math.pow(userData.streak, 2) * 20)) == 1) {
             picture(message.author);
-        } else if (Math.floor(Math.random()*(userData.coins / userData.coins**2 * 400)) == 1) {
+        } else if (Math.floor(Math.random()*(userData.coins / Math.pow(userData.coins, 2) * 400)) == 1) {
             picture(message.author);
         }
     }
