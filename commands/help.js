@@ -21,9 +21,12 @@ exports.run = function(client, message, args) {
   /*
    * COMMAND LIST
    */
-  .addField('Help', `...`)
+  .addField('**User Commands**')
+  .addField('Help', `*This Message*`)
   .addField('Random', `Requests for a Random Image from a Specified SubReddit\n**Usage** ^Random <subreddit>`)
   .addField('Rem', `Returns 'REM!' if Online\n**Usage** ^Rem`)
+  .addField('Points', `Returns Your Current Points. *Points Vary Over Time*\n**Usage** ^Points`)
+  .addField('Streak', `Returns Your Current Message Streak\n**Usage** ^Streak`)
   .addField('**Admin Commands:**')
   .addField('ClearPoints', `Used to Clear User Message Count\n**Usage** ^ClearPoints`)
   .addField('Say', `Messages Relative Chat with Specified Argument\n**Usage** ^Say <Message>`)
