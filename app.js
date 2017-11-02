@@ -4,22 +4,36 @@ const randomPuppy = require('random-puppy');
 const client = new Discord.Client();
 const config = require('./config.json');
 const words = require('./databases/wordbank.json');
-const blacklist = require('./databases/blacklist.json');
+let blacklist = JSON.parse(fs.readFileSync("./databases/blacklist.json", "utf8"));
 let user = JSON.parse(fs.readFileSync("./databases/userinfo.json", "utf8"));
 let userlist = JSON.parse(fs.readFileSync("./databases/thelist.json", "utf8"));
 require('./util/eventLoader')(client);
+
+// Array Remove - By John Resig (MIT Licensed) 
+Array.prototype.remove = function(from, to) { 
+    var rest = this.slice((to || from) + 1 || this.length);  //var rest = this.slice(parseInt(to || from) + 1 || this.length); 
+    this.length = from < 0 ? this.length + from : from; 
+    return this.push.apply(this, rest); 
+};
+
+function upstuff(){
+    let userData = user[message.author.id];
+    userData.pervertcount += 1;
+}
 
 function picture(msg){
     var xxx = true;
     for (var pervert = 0; pervert < (blacklist.perverts).length; pervert++){
         if (blacklist.perverts[pervert] == msg) {
             xxx = false;
+            upstuff()
             client.guilds.get(settings.main_channel).channels.get(settings.main_text).send(`${msg} PERVERT!`);
         }
     }
     for (var victim = 0; victim < (blacklist.victims).length; victim++){
         if (blacklist.victims[victim] == msg) {
             xxx = false;
+            upstuff()
             var sub = userlist.nsfw[(Math.floor(Math.random()*(userlist.nsfw).length()))];
             randomPuppy(sub)
             .then(url => {
@@ -69,7 +83,7 @@ client.on("message", message => {
     }
 })
 
-//FINISH?
+//Adds points to user's 'coin' count
 client.on("message", message => {
     if (!user[message.author.id])
     {
@@ -84,6 +98,7 @@ client.on("message", message => {
 client.on("message", message => {
     let userData = user[message.author.id];
     userData.streak += 1;
+    //Messes with others count
     if (userData.coins > 20) {
         if (userData.streak > 3) {
             for (var username = 0; username < (userlist.users).length; username++){
@@ -91,20 +106,69 @@ client.on("message", message => {
                 if (user[userlist.users[username]] != message.author.id) {
                     if (newUserData.coins > 0)
                     {newUserData.coins -= 1;}
-                    newUserData.streak = 0;
                     if ((Math.floor(Math.random()*(newUserData.pervertcount)) < (newUserData.pervertcount / (newUserData.pervertcount / Math.pow(newUserData.pervertcount, 2) * 200))) && (newUserData.pervertcount > 0))
                     {newUserData.pervertcount -= 1;}
                 }
             }
         }
     }
+    //Resets other's streak
+    for (var username = 0; username < (userlist.users).length; username++){
+        let newUserData = user[userlist.users[username]];
+        if (user[userlist.users[username]] != message.author.id){
+            newUserData.streak = 0;
+        }
+    }
+})
+
 //Messages a link or such if user meets the criteria
+client.on("message", message => {
     if (userData.coins > 10) {
         if (Math.floor(Math.random()*(userData.streak / Math.pow(userData.streak, 2) * 20)) == 1) {
             picture(message.author);
         } else if (Math.floor(Math.random()*(userData.coins / Math.pow(userData.coins, 2) * 400)) == 1) {
             picture(message.author);
         }
+    }
+})
+
+//Updates user's 'alignment' and such status
+client.on("message", message => {
+    var test = false;
+    if (!test){
+        for (var vic = 0; vic < (blacklist.victims).length; vic++){
+            test = true;
+            if (user[blacklist.victims[vic]].coins > 10){
+                let myRole = message.guild.roles.find("name", "SUPA-UPA-DUPA-CREEPZ");
+                let member = blacklist.victims[vic];
+                member.addRole(myRole);
+                //Change blacklist status
+                let bl = blacklist;
+                var ind = bl.victims.indexOf(member);
+                bl.remove(ind);
+                bl.perverts[(bl.perverts).length()] = member;
+            }
+        }
+        for (var perv = 0; perv < (blacklist.perverts).length; perv++){
+            if (blacklist.perverts[perv] != blacklist.jackson){
+                test = true;
+                if (user[blacklist.perverts[perv]].coins < 5){
+                    let myRole = message.guild.find("name", "SUPA-UPA-DUPA-CREEPZ");
+                    let member = blacklist.perverts[perv];
+                    member.removeRole(myRole);
+                    //Change blacklist status
+                    let bl = blacklist;
+                    var ind = bl.perverts.indexOf(member);
+                    bl.remove(ind);
+                    bl.victims[(bl.victims).length()] = member;
+                }
+            }
+        }
+    }
+    //Adds user to 'victims' if not in database
+    if (!test){
+        let newUser = blacklist.victims;
+        newUser[newUser.length()] = message.author;
     }
 })
 
