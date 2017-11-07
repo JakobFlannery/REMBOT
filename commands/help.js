@@ -29,6 +29,7 @@ exports.run = function(client, message, args) {
   .addField('Streak', `Returns Your Current Message Streak\n**Usage** ^Streak`)
   .addField('**Admin Commands:**')
   .addField('ClearPoints', `Used to Clear User Message Count\n**Usage** ^ClearPoints`)
+  .addField('ResetCount', `Used to Clear User \'Pervert\' Count\n**Usage** ^ResetCount`)
   .addField('Say', `Messages Relative Chat with Specified Argument\n**Usage** ^Say <Message>`)
   .addField('Send', `Messages Specified Chat with Specified Argument\n**Usage** ^Send <ChannelID> <Message>`)
   /*

@@ -2,7 +2,8 @@ const chalk = require('chalk');
 const settings = require('../config.json');
 
 exports.run = function(client, message, args) {
-    if (message.author == settings.adminid) {
+    if ((settings.adminid).indexOf(message.author) > -1)//CHECK
+    {
         console.log(chalk.bgYellow('Send Command Used!'));
         let result = args.join(' ');
 
@@ -18,7 +19,9 @@ exports.run = function(client, message, args) {
 
         // Actually sends the message, yay.
         client.channels.get(server[0]).send(message);
-    } else {
+    }
+    else
+    {
         message.channel.send(`Rem says no!  ${message.author}`);
     }
 }
