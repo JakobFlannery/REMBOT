@@ -4,11 +4,16 @@ const settings = require('../config.json');
 const chalk = require('chalk');
 
 exports.run = function(client, message, args) {
-    if (message.author == settings.adminid) {
-        console.log(chalk.bgRed('Wiped Pedo Count!'));
-        for (var username = 0; username < (userlist.users).length; username++) {
-            let newUserData = user[userlist.users[username]];
-            newUserData.pervertcount = 0;
+    if ((settings.adminid).indexOf(message.author) > -1)//CHECK
+    {
+        console.log(chalk.bgRed('Wiped all User Coin Data!'));
+        for (var userid = 0; userid < (userlist.users).length(); userid++)//CHECK
+        {
+            let userData = user[userlist.users[username]];//CHECK
+            userData.pervertcount = 0;
         }
     }
+    fs.writeFile("../userinfo.json", JSON.stringify(user), (err) => {
+        if (err) console.error(err)
+    });
 }
