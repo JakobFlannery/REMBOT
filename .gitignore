@@ -59,11 +59,6 @@ typings/
 
 # Config file
 config.json
-databases/blacklist.json
-databases/thelist.json
 package-lock.json
 package.json
-databases/thelist.json
-databases/blacklist.json
 package.json
-*.json
