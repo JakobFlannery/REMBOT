@@ -1,25 +1,26 @@
+const fs = require('fs');
 const randomPuppy = require('random-puppy');
-const people = require('../databases/blacklist.json');
-const thelist = require('../databases/thelist.json');
-let user = JSON.parse(fs.readFileSync("../databases/userinfo.json", "utf8"));
+let people = require('../databases/blacklist.json');
+let thelist = require('../databases/thelist.json');
+let user = JSON.parse(fs.readFileSync("./databases/userinfo.json", "utf8"));
 
 function upstuff(auth)
 {
     let userData = user[auth];
     userData.pervertcount += 1;
-    fs.writeFile("../userinfo.json", JSON.stringify(user), (err) => {
+    fs.writeFile("./databases/userinfo.json", JSON.stringify(user), (err) => {
         if (err) console.error(err)
     });
 }
 
 function profanity(suspect)
 {
-    for (var person = 0; person < (people.perverts).length(); person++)//CHECK
+    for (var person = 0; person < (people.perverts).length; person++)//CHECK
     {
         if (suspect == people.perverts[person])
         {return 1;}
     }
-    for (var person = 0; person < (people.victims).length(); person++)//CHECK
+    for (var person = 0; person < (people.victims).length; person++)//CHECK
     {
         if (suspect == people.victims[person])
         {return 2;}
@@ -28,7 +29,7 @@ function profanity(suspect)
 
 function fetch(sub) {
     if (Math.floor(Math.random()*10) == 1)
-    {return (thelist.nsfw[Math.floor(Math.random()*(thelist.nsfw).length())]);}//CHECK
+    {return (thelist.nsfw[Math.floor(Math.random()*(thelist.nsfw).length)]);}//CHECK
     return sub;
 }
 
