@@ -216,6 +216,9 @@ client.on("message", message => {
 
 //File commands
 client.on("message", message => {
+    if (message.author.bot)
+    {return;}
+    let userData = user[message.author.id];
     //Clearpoints
     if (message.content.startsWith(prefix + "clearpoints"))
     {
