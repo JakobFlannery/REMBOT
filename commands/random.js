@@ -1,14 +1,14 @@
-const fs = require('fs');
 const randomPuppy = require('random-puppy');
-let people = require('../databases/blacklist.json');
-let thelist = require('../databases/thelist.json');
+const fs = require('fs');
+const people = require('../databases/blacklist.json');
+const thelist = require('../databases/thelist.json');
 let user = JSON.parse(fs.readFileSync("./databases/userinfo.json", "utf8"));
 
 function upstuff(auth)
 {
     let userData = user[auth];
     userData.pervertcount += 1;
-    fs.writeFile("./databases/userinfo.json", JSON.stringify(user), (err) => {
+    fs.writeFile("../databases/userinfo.json", JSON.stringify(user), (err) => {
         if (err) console.error(err)
     });
 }

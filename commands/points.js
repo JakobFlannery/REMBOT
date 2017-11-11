@@ -1,6 +1,4 @@
-const fs = require('fs');
-let user = JSON.parse(fs.readFileSync("./databases/userinfo.json", "utf8"));
-
+const user = require('../databases/userinfo.json');
 
 exports.run = function(client, message, args) {
     var points = user[message.author.id];

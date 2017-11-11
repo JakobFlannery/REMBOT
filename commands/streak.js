@@ -1,5 +1,4 @@
-const fs = require('fs');
-let user = require('../databases/userinfo.json');
+const user = require('../databases/userinfo.json');
 
 exports.run = function(client, message, args) {
     var points = user[message.author.id];
