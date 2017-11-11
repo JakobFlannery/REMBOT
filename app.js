@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const fs = require('fs');
+const chalk = require('chalk');
 const randomPuppy = require('random-puppy');
 const client = new Discord.Client();
 const settings = require('./config.json');
@@ -8,6 +9,8 @@ let blacklist = JSON.parse(fs.readFileSync("./databases/blacklist.json", "utf8")
 let user = JSON.parse(fs.readFileSync("./databases/userinfo.json", "utf8"));
 let userlist = JSON.parse(fs.readFileSync("./databases/thelist.json", "utf8"));
 require('./util/eventLoader')(client);
+
+let prefix = settings.prefix;
 
 // Array Remove - By John Resig (MIT Licensed) 
 Array.prototype.remove = function(from, to) { 
@@ -24,6 +27,20 @@ function upstuff(auth)
     fs.writeFile("./databases/userinfo.json", JSON.stringify(user), (err) => {
         if (err) console.error(err)
     });
+}
+
+function profanity(suspect)
+{
+    for (var person = 0; person < (people.perverts).length; person++)//CHECK
+    {
+        if (suspect == people.perverts[person])
+        {upstuff(supsect);}
+    }
+    for (var person = 0; person < (people.victims).length; person++)//CHECK
+    {
+        if (suspect == people.victims[person])
+        {upstuff(suspect);}
+    }
 }
 
 //Posts a message dependant on user 'alignment'
@@ -123,6 +140,7 @@ client.on("message", message => {
             newUserData.streak = 0;
         }
     }
+    //Save data
     fs.writeFile("./databases/userinfo.json", JSON.stringify(user), (err) => {
         if (err) console.error(err)
     });
@@ -195,5 +213,56 @@ client.on("message", message => {
         if (err) console.error(err)
     });
 });
+
+//File commands
+client.on("message", message => {
+    //Clearpoints
+    if (message.content.startsWith(prefix + "clearpoints"))
+    {
+        if ((settings.adminid).indexOf(message.author.id) > -1)//CHECK
+        {
+            console.log(chalk.bgRed('Wiped all User Coin Data!'));
+            for (var userid = 0; userid < (userlist.users).length; userid++)//CHECK
+            {
+                let userData = user[userlist.users[userid]];//CHECK
+                userData.msgcount = 0;
+            }
+        }
+        fs.writeFile("./databases/userinfo.json", JSON.stringify(user), (err) => {
+            if (err) console.error(err)
+        });
+    }
+    //Resetcount
+    if (message.content.startsWith(prefix + "resetcount"))
+    {
+        if ((settings.adminid).indexOf(message.author) > -1)//CHECK
+        {
+            console.log(chalk.bgRed('Wiped all User Coin Data!'));
+            for (var userid = 0; userid < (userlist.users).length; userid++)//CHECK
+            {
+                let userData = user[userlist.users[username]];//CHECK
+                userData.pervertcount = 0;
+            }
+        }
+        fs.writeFile("./databases/userinfo.json", JSON.stringify(user), (err) => {
+            if (err) console.error(err)
+        });
+    }
+    //Points
+    if (message.content.startsWith(prefix + "points"))
+    {message.channel.send(`${message.author} Has ${userData.msgcount} Points Right Now`);}
+    //Streak
+    if (message.content.startsWith(prefix + "streak"))
+    {message.channel.send(`${message.author} Has Reached a ${userData.streak} Post Streak!`);}
+    //Random - profanity check
+    if (message.content.startsWith(prefix + "random"))
+    {
+        profanity(message.author.id);
+        let args = message.content.split(' ').slice(1);
+        var param = args.join(' ');
+        if ((userlist.DANGEROUS_CRAP).indexOf(param) > -1)
+        {upstuff(message.author.id);}
+    }
+})
 
 client.login(settings.token)

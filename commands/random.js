@@ -1,17 +1,6 @@
 const randomPuppy = require('random-puppy');
-const fs = require('fs');
 const people = require('../databases/blacklist.json');
 const thelist = require('../databases/thelist.json');
-let user = JSON.parse(fs.readFileSync("./databases/userinfo.json", "utf8"));
-
-function upstuff(auth)
-{
-    let userData = user[auth];
-    userData.pervertcount += 1;
-    fs.writeFile("../databases/userinfo.json", JSON.stringify(user), (err) => {
-        if (err) console.error(err)
-    });
-}
 
 function profanity(suspect)
 {
@@ -35,21 +24,15 @@ function fetch(sub) {
 
 exports.run = function (client, message, args) {
     let param = args.join(' ');
-    
-    //Check to see if arg is in 'DANGEROUS_STUFF'
-    if ((thelist.DANGEROUS_CRAP).indexOf(param) > -1)
-    {upstuff(message.author.id);}
 
     //Send reply, may 'frame' them
     if (profanity(message.author.id) == 1)
     {
         console.log('PERVERT!');
         message.channel.send(`WHAT PERVERTED INTENTIONS DO YOU HAVE IN MIND??!!! ${message.author}\nI REFUSE!`)
-        upstuff(message.author.id);
     }
     else if (profanity(message.author.id) == 2)
     {
-        upstuff(message.author.id);
         fsearch = fetch(param);
         randomPuppy(fsearch)
         .then(url => {
