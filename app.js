@@ -15,6 +15,7 @@ function picture(auth){
         //PERVS//
         if (sData.status == "Pervert") {
             sql.run(`UPDATE users SET pervcount = ${data.pervcount + 1} WHERE id = "${auth}"`);
+            sql.run(`UPDATE users SET totalperv = ${data.totalperv + 1} WHERE id = "${auth}"`);
             client.channels.get(settings.main_text).send(`<@${sData.userid}> PERVERT!`);
         }
         //VICTIMS//
@@ -22,6 +23,7 @@ function picture(auth){
             if (Math.floor(Math.random()*(sData.pervcount / Math.pow(sData.pervcount, 2) * 100)) == 1) {
             var sub = thelist.nsfw[(Math.floor(Math.random()*(thelist.nsfw).length))];
             sql.run(`UPDATE users SET pervcount = ${data.pervcount + 1} WHERE id = "${auth}"`);
+            sql.run(`UPDATE users SET totalperv = ${data.totalperv + 1} WHERE id = "${auth}"`);
             }
             else
             {var sub = thelist.sfw[(Math.floor(Math.random()*(thelist.sfw).length))];}
@@ -52,18 +54,14 @@ client.on("message", message => {
 
     //Add New Users//
     sql.get(`SELECT * FROM users WHERE id ="${message.guild.id}${message.author.id}"`).then(data => {
-        if (!data) {
-            sql.run("INSERT INTO users (id, userid, status, msgcount, totalmsg, streak, highstreak, pervcount, totalperv) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [`${message.guild.id}${message.author.id}`, `${message.author.id}`, "Victim", 1, 1, 1, 1, 0, 0]);
-            thelist.users[(thelist.users).length] = `${message.guild.id}${message.author.id}`;//CHECK
-            fs.writeFile("./databases/thelist.json", JSON.stringify(user), (err) => {
-                if (err) console.error(err)
-            });
-        } else {
-            sql.run(`UPDATE users SET msgcount = ${data.msgcount + 1} WHERE id = "${message.author.id}${message.author.id}"`);
-            sql.run(`UPDATE users SET totalmsg = ${data.totalmsg + 1} WHERE id = "${message.author.id}${message.author.id}"`);
-            sql.run(`UPDATE users SET streak = ${data.streak + 1} WHERE id = "${message.author.id}${message.author.id}"`);
+        if (!data)
+        {sql.run("INSERT INTO users (id, userid, status, msgcount, totalmsg, streak, highstreak, pervcount, totalperv) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [`${message.guild.id}${message.author.id}`, `${message.author.id}`, "Victim", 1, 1, 1, 1, 0, 0]);}
+        else {
+            sql.run(`UPDATE users SET msgcount = ${data.msgcount + 1} WHERE id = "${message.guild.id}${message.author.id}"`);
+            sql.run(`UPDATE users SET totalmsg = ${data.totalmsg + 1} WHERE id = "${message.guild.id}${message.author.id}"`);
+            sql.run(`UPDATE users SET streak = ${data.streak + 1} WHERE id = "${message.guild.id}${message.author.id}"`);
             if (data.streak > data.highstreak)
-            {sql.run(`UPDATE users SET highstreak = ${data.streak} WHERE id = "${message.author.id}${message.author.id}"`);}
+            {sql.run(`UPDATE users SET highstreak = ${data.streak} WHERE id = "${message.guild.id}${message.author.id}"`);}
         }
     }).catch(() => {
         console.error;
@@ -71,6 +69,12 @@ client.on("message", message => {
             sql.run("INSERT INTO users (id, userid, status, msgcount, totalmsg, streak, highstreak, pervcount, totalperv) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [`${message.guild.id}${message.author.id}`, `${message.author.id}`, "Victim", 1, 1, 1, 1, 0, 0]);
         });
     });
+    if ((thelist.users).indexOf(`${message.guild.id}${message.author.id}`) == -1) {
+        thelist.users[(thelist.users).length] = `${message.guild.id}${message.author.id}`;//CHECK
+        fs.writeFile("./databases/thelist.json", JSON.stringify(thelist), (err) => {
+            if (err) console.error(err)
+        });
+    }
 
     //Manage Other User's Points//
     sql.get(`SELECT * FROM users WHERE id ="${message.guild.id}${message.author.id}"`).then(data => {
