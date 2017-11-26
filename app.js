@@ -1,271 +1,127 @@
 const Discord = require('discord.js');
 const fs = require('fs');
-const chalk = require('chalk');
 const randomPuppy = require('random-puppy');
 const client = new Discord.Client();
 const settings = require('./config.json');
-const words = require('./databases/wordbank.json');
-let blacklist = JSON.parse(fs.readFileSync("./databases/blacklist.json", "utf8"));
-let user = JSON.parse(fs.readFileSync("./databases/userinfo.json", "utf8"));
-let userlist = JSON.parse(fs.readFileSync("./databases/thelist.json", "utf8"));
+const sql = require("sqlite");
+let thelist = JSON.parse(fs.readFileSync("./databases/thelist.json", "utf8"));
 require('./util/eventLoader')(client);
+sql.open("./databases/userdata.sqlite");
 
-let prefix = settings.prefix;
 
-// Array Remove - By John Resig (MIT Licensed) 
-Array.prototype.remove = function(from, to) { 
-    var rest = this.slice((to || from) + 1 || this.length);  //var rest = this.slice(parseInt(to || from) + 1 || this.length); 
-    this.length = from < 0 ? this.length + from : from; 
-    return this.push.apply(this, rest); 
-};
 
-//Adds to 'pervertcount'
-function upstuff(auth)
-{
-    let userData = user[auth];
-    userData.pervertcount += 1;
-    fs.writeFile("./databases/userinfo.json", JSON.stringify(user), (err) => {
-        if (err) console.error(err)
-    });
-}
-
-function profanity(suspect)
-{
-    for (var person = 0; person < (people.perverts).length; person++)//CHECK
-    {
-        if (suspect == people.perverts[person])
-        {upstuff(supsect);}
-    }
-    for (var person = 0; person < (people.victims).length; person++)//CHECK
-    {
-        if (suspect == people.victims[person])
-        {upstuff(suspect);}
-    }
-}
-
-//Posts a message dependant on user 'alignment'
-function picture(auth)
-{
-    var xxx = true;
-    for (var perv = 0; perv < (blacklist.perverts).length; perv++)//CHECK
-    {
-        if (blacklist.perverts[perv] == auth)
-        {
-            xxx = false;
-            upstuff(auth);
-            client.channels.get(settings.main_text).send(`<@${auth}> PERVERT!`);
+function picture(auth){
+    sql.get(`SELECT * FROM users WHERE id ="${auth}"`).then(sData => {
+        //PERVS//
+        if (sData.status == "Pervert") {
+            sql.run(`UPDATE users SET pervcount = ${data.pervcount + 1} WHERE id = "${auth}"`);
+            client.channels.get(settings.main_text).send(`<@${sData.userid}> PERVERT!`);
         }
-    }
-    for (var vic = 0; vic < (blacklist.victims).length; vic++)//CHECK
-    {
-        if (blacklist.victims[vic] == auth)
-        {
-            xxx = false;
-            upstuff(auth);
-            var sub = userlist.nsfw[(Math.floor(Math.random()*(userlist.nsfw).length))];//CHECK
+        //VICTIMS//
+        if (sData.status == "Victim") {
+            if (Math.floor(Math.random()*(sData.pervcount / Math.pow(sData.pervcount, 2) * 100)) == 1) {
+            var sub = thelist.nsfw[(Math.floor(Math.random()*(thelist.nsfw).length))];
+            sql.run(`UPDATE users SET pervcount = ${data.pervcount + 1} WHERE id = "${auth}"`);
+            }
+            else
+            {var sub = thelist.sfw[(Math.floor(Math.random()*(thelist.sfw).length))];}
             randomPuppy(sub)
             .then(url => {
                 console.log(url);
-                client.channels.get(settings.main_text).send(`<@${auth}> Seems to have requested this? ...\n${url}`);
+                client.channels.get(settings.main_text).send(`<@${sData.userid}> Seems to have requested this? ...\n${url}`);
             })
         }
-    }
-    for (var ally = 0; ally < (blacklist.allies).length; ally++)//CHECK
-    {
-        if (blacklist.allies[ally] == auth)
-        {
-            xxx = false;
-            var sub = userlist.sfw[(Math.floor(Math.random()*(userlist.sfw).length))];//CHECK
+        //FRIENDS//
+        if (sData.status == "Friend") {
+            var sub = thelist.sfw[(Math.floor(Math.random()*(thelist.sfw).length))];//CHECK
             randomPuppy(sub)
             .then(url => {
                 console.log(url);
-                client.channels.get(settings.main_text).send(`<@${auth}> Something to cheer you up!!\n${url}`);
+                client.channels.get(settings.main_text).send(`<@${sData.userid}> Something to cheer you up!!\n${url}`);
             })
         }
-    }
-    if (xxx)
-    {
-        for (var other = 0; other < (userlist.users).length; other++)//CHECK
-        {
-            if (userlist.users[other] == auth)
-            {
-                var sub = userlist.sfw[(Math.floor(Math.random()*(userlist.sfw).length))];//CHECK
-                randomPuppy(sub)
-                .then(url => {
-                    console.log(url);
-                    client.channels.get(settings.main_text).send(`<@${auth}> Have a picture!\n${url}`);
-                })
-            }
-        }
-    }
+    });
 }
 
-/*Manages point systems*/
+
+
+/*Everytime User Messages*/
 client.on("message", message => {
-    //Adds points to msgcount and creates new user data if needed
-    if (message.author.bot)
-    {return;}
-    if (!user[message.author.id])
-    {
-        user[message.author.id] = {msgcount: 0, streak: 0, pervertcount: 0};
-        userlist.users[(userlist.users).length] = message.author.id;//CHECK
-    }
-    let userData = user[message.author.id];
-    userData.msgcount += 1;
-    userData.streak += 1;
-    //Manages pervertcount and msgcount for others
-    if (userData.msgcount > 20)
-    {
-        if (userData.streak > 3)
+    if (message.author.bot || message.channel.type == "dm")
+        {return;}
+
+    //Add New Users//
+    sql.get(`SELECT * FROM users WHERE id ="${message.guild.id}${message.author.id}"`).then(data => {
+        if (!data) {
+            sql.run("INSERT INTO users (id, userid, status, msgcount, totalmsg, streak, highstreak, pervcount, totalperv) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [`${message.guild.id}${message.author.id}`, `${message.author.id}`, "Victim", 1, 1, 1, 1, 0, 0]);
+            thelist.users[(thelist.users).length] = `${message.guild.id}${message.author.id}`;//CHECK
+            fs.writeFile("./databases/thelist.json", JSON.stringify(user), (err) => {
+                if (err) console.error(err)
+            });
+        } else {
+            sql.run(`UPDATE users SET msgcount = ${data.msgcount + 1} WHERE id = "${message.author.id}${message.author.id}"`);
+            sql.run(`UPDATE users SET totalmsg = ${data.totalmsg + 1} WHERE id = "${message.author.id}${message.author.id}"`);
+            sql.run(`UPDATE users SET streak = ${data.streak + 1} WHERE id = "${message.author.id}${message.author.id}"`);
+            if (data.streak > data.highstreak)
+            {sql.run(`UPDATE users SET highstreak = ${data.streak} WHERE id = "${message.author.id}${message.author.id}"`);}
+        }
+    }).catch(() => {
+        console.error;
+        sql.run("CREATE TABLE IF NOT EXISTS users (id TEXT, userid TEXT, status TEXT, msgcount INTEGER, totalmsg INTEGER, streak INTEGER, highstreak INTEGER, pervcount INTEGER, totalperv INTEGER)").then(() => {
+            sql.run("INSERT INTO users (id, userid, status, msgcount, totalmsg, streak, highstreak, pervcount, totalperv) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [`${message.guild.id}${message.author.id}`, `${message.author.id}`, "Victim", 1, 1, 1, 1, 0, 0]);
+        });
+    });
+
+    //Manage Other User's Points//
+    sql.get(`SELECT * FROM users WHERE id ="${message.guild.id}${message.author.id}"`).then(data => {
+        for (var userid = 0; userid < (thelist.users).length; userid++)
         {
-            for (var userid = 0; userid < (userlist.users).length; userid++)//CHECK
-            {
-                if (userlist.users[userid] != message.author.id)
-                {
-                    let newUserData = user[userlist.users[userid]];//CHECK
-                    if (newUserData.msgcount > 0)
-                    {newUserData.msgcount -= 1;}
-                    if ((Math.floor(Math.random()*(newUserData.pervertcount)) < (newUserData.pervertcount / (newUserData.pervertcount / Math.pow(newUserData.pervertcount, 2) * 200))) && (newUserData.pervertcount > 0))
-                    {newUserData.pervertcount -= 1;}
-                }
+            if (thelist.users[userid] != `${message.guild.id}${message.author.id}`) {
+                sql.get(`SELECT * FROM users WHERE id ="${message.guild.id}${message.author.id}"`).then(newData => {
+                    if (data.msgcount > 20 && data.streak > 3) {
+                        if (newData.msgcount > 0)
+                        {sql.run(`UPDATE users SET msgcount = ${newData.msgcount - 1} WHERE id = "${thelist.users[userid]}"`);}
+                        if ((Math.floor(Math.random()*(newData.pervcount)) < (newData.pervcount / (newData.pervcount / Math.pow(newData.pervcount, 2) * 200))) && (newData.pervcount > 0))
+                        {sql.run(`UPDATE users SET pervcount = ${newData.pervcount - 1} WHERE id = "${thelist.users[userid]}"`);}
+                    }
+                    sql.run(`UPDATE users SET streak = ${newData.streak * 0} WHERE id = "${thelist.users[userid]}"`);
+                });
             }
         }
-    }
-    //Resets others' streak
-    for (var userid = 0; userid < (userlist.users).length; userid++)//CHECK
-    {
-        if (userlist.users[userid] != message.author.id)
-        {
-            let newUserData = user[userlist.users[userid]];//CHECK
-            newUserData.streak = 0;
+    });
+
+    //Messages Random Image Sometimes//
+    sql.get(`SELECT * FROM users WHERE id ="${message.guild.id}${message.author.id}"`).then(data => {
+        if (data.msgcount > 10) {
+            if (Math.floor(Math.random()*(data.streak / Math.pow(data.streak, 2) * 20)) == 1 || Math.floor(Math.random()*(data.msgcount / Math.pow(data.msgcount, 2) * 400)) == 1)
+            {picture(data.id);}
         }
-    }
-    //Save data
-    fs.writeFile("./databases/userinfo.json", JSON.stringify(user), (err) => {
-        if (err) console.error(err)
     });
-    fs.writeFile("./databases/thelist.json", JSON.stringify(userlist), (err) => {
-        if (err) console.error(err)
-    });
-});
 
-/*Messages a random image sometimes...*/
-client.on("message", message => {
-    if (message.author.bot)
-    {return;}
-    let userData = user[message.author.id];
-    if (userData.msgcount > 10)
+    //Manages User Status//
+    for (var userid = 0; userid < (thelist.users).length; userid++)
     {
-        if (Math.floor(Math.random()*(userData.streak / Math.pow(userData.streak, 2) * 20)) == 1)
-        {picture(message.author.id);}
-        else if (Math.floor(Math.random()*(userData.msgcount / Math.pow(userData.msgcount, 2) * 1000)) == 1)
-        {picture(message.author.id);}
-    }
-});
-
-/*Manages 'alignment' of users*/
-client.on("message", message => {
-    if (message.author.bot)
-    {return;}
-    if ((blacklist.victims).indexOf(message.author.id) > -1)//CHECK
-    {
-        for (var vic = 0; vic < (blacklist.victims).length; vic++)//CHECK
-        {
-            if (user[blacklist.victims[vic]].msgcount > 10)//CHECK
-            {
+        sql.get(`SELECT * FROM users WHERE id ="${thelist.users[userid]}"`).then(data => {
+            //VICTIMS//
+            if (data.status == "Victim" && data.pervcount > 10) {
+                //Manage Role//
                 let myRole = message.guild.roles.find("name", "SUPA-UPA-DUPA-CREEPZ");
-                let member = blacklist.victims[vic];
+                let member = data.userid;
                 member.addRole(myRole);
-                //Change blacklist status
-                let bl = blacklist;
-                var ind = bl.victims.indexOf(member);
-                bl.remove(ind);//CHECK
-                bl.perverts[(bl.perverts).length] = member;//CHECK
+                //Manage Status//
+                sql.run(`UPDATE users SET status = "Pervert" WHERE id = "${data.id}"`);
             }
-        }
-    }
-    else if ((blacklist.perverts).indexOf(message.author.id) > -1)//CHECK
-    {
-        for (var perv = 0; perv < (blacklist.perverts).length; perv++)//CHECK
-        {
-            if (blacklist.perverts[perv] != blacklist.jackson)
-            {
-                if (user[blacklist.perverts[perv]].msgcount < 5)//CHECK
-                {
-                    let myRole = message.guild.find("name", "SUPA-UPA-DUPA-CREEPZ");
-                    let member = blacklist.perverts[perv];
-                    member.removeRole(myRole);
-                    //Change blacklist status
-                    let bl = blacklist;
-                    var ind = bl.perverts.indexOf(member);
-                    bl.remove(ind);//CHECK
-                    bl.victims[(bl.victims).length] = member;//CHECK
-                }
+            //PERVERTS//
+            if (data.status == "Pervert" && data.pervcount < 5) {
+                //Manage Role//
+                let myRole = message.guild.roles.find("name", "SUPA-UPA-DUPA-CREEPZ");
+                let member = data.userid;
+                member.removeRole(myRole);
+                //Manage Status//
+                sql.run(`UPDATE users SET status = "Victim" WHERE id = "${data.id}"`);
             }
-        }
+        });
     }
-    else if ((blacklist.allies).indexOf(message.author.id) == -1)//CHECK
-    {
-        let newUser = blacklist.victims;
-        newUser[(blacklist.victims).length] = message.author.id;//CHECK
-    }
-    fs.writeFile("./databases/thelist.json", JSON.stringify(userlist), (err) => {
-        if (err) console.error(err)
-    });
 });
-
-//File commands
-client.on("message", message => {
-    if (message.author.bot)
-    {return;}
-    let userData = user[message.author.id];
-    //Clearpoints
-    if (message.content.startsWith(prefix + "clearpoints"))
-    {
-        if ((settings.adminid).indexOf(message.author.id) > -1)//CHECK
-        {
-            console.log(chalk.bgRed('Wiped all User Coin Data!'));
-            for (var userid = 0; userid < (userlist.users).length; userid++)//CHECK
-            {
-                let userData = user[userlist.users[userid]];//CHECK
-                userData.msgcount = 0;
-            }
-        }
-        fs.writeFile("./databases/userinfo.json", JSON.stringify(user), (err) => {
-            if (err) console.error(err)
-        });
-    }
-    //Resetcount
-    if (message.content.startsWith(prefix + "resetcount"))
-    {
-        if ((settings.adminid).indexOf(message.author) > -1)//CHECK
-        {
-            console.log(chalk.bgRed('Wiped all User Coin Data!'));
-            for (var userid = 0; userid < (userlist.users).length; userid++)//CHECK
-            {
-                let userData = user[userlist.users[username]];//CHECK
-                userData.pervertcount = 0;
-            }
-        }
-        fs.writeFile("./databases/userinfo.json", JSON.stringify(user), (err) => {
-            if (err) console.error(err)
-        });
-    }
-    //Points
-    if (message.content.startsWith(prefix + "points"))
-    {message.channel.send(`${message.author} Has ${userData.msgcount} Points Right Now`);}
-    //Streak
-    if (message.content.startsWith(prefix + "streak"))
-    {message.channel.send(`${message.author} Has Reached a ${userData.streak} Post Streak!`);}
-    //Random - profanity check
-    if (message.content.startsWith(prefix + "random"))
-    {
-        profanity(message.author.id);
-        let args = message.content.split(' ').slice(1);
-        var param = args.join(' ');
-        if ((userlist.DANGEROUS_CRAP).indexOf(param) > -1)
-        {upstuff(message.author.id);}
-    }
-})
 
 client.login(settings.token)
