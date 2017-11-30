@@ -27,11 +27,15 @@ exports.run = function(client, message, args) {
   .addField('Rem', `Returns 'Rem!' if Online\n**Usage** ^Rem`)
   .addField('Points', `Returns Your Current Points. *Points Vary Over Time*\n**Usage** ^Points`)
   .addField('Streak', `Returns Your Current Message Streak\n**Usage** ^Streak`)
+  .addField('Status', `Returns Your Current Status (Friend, Victim, Perv)\n**Usage** ^Status`)
   .addField('\u200b', `**Admin Commands:**`)
   .addField('ClearPoints', `Used to Clear User Message Count\n**Usage** ^ClearPoints`)
   .addField('ResetCount', `Used to Clear User \'Pervert\' Count\n**Usage** ^ResetCount`)
   .addField('Say', `Messages Relative Chat with Specified Argument\n**Usage** ^Say <Message>`)
   .addField('Send', `Messages Specified Chat with Specified Argument\n**Usage** ^Send <ChannelID> <Message>`)
+  .addField('DefaultStatus', `Used to Update Default Status (Friend, Victim, Perv)\n**Usage** ^DefaultStatus <Status>`)
+  .addField('DefaultChannel', `Used to Update Channel in Which Spam is Messaged (Can be DM)\n**Usage** ^DefaultChannel <ChannelID>`)
+  .addField('UpdateStatus', `Used to Update a User's Status\n**Usage** ^UpdateStatus <Status> <@UserID>`)
   /*
    * Blank field, useful to create some space.
    */

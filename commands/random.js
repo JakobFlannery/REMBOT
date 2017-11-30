@@ -7,11 +7,20 @@ sql.open("./databases/userdata.sqlite");
 
 function fetch(sub) {
     if (Math.floor(Math.random()*10) == 1)
-    {return (thelist.nsfw[Math.floor(Math.random()*(thelist.nsfw).length)]);}
+        {return (thelist.nsfw[Math.floor(Math.random()*(thelist.nsfw).length)]);}
     return sub;
 }
 
 exports.run = function (client, message, args) {
+    /*sql.get(`SELECT * FROM ${message.guild.id} WHERE id = "${message.author.id}"`).then(data => {
+        let param = args.join(' ');
+        //DANGEROUS STUFF//
+        if ((thelist.DANGEROUS_CRAP).indexOf(param) > -1) {
+            //...
+        }
+    });
+    */
+
     sql.get(`SELECT * FROM users WHERE id ="${message.guild.id}${message.author.id}"`).then(data => {
         let param = args.join(' ');
         //DANGEROUS Stuff//
