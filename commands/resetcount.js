@@ -1,4 +1,3 @@
-const thelist = require('../databases/thelist.json');
 const settings = require('../config.json');
 const chalk = require('chalk');
 const sql = require("sqlite");
@@ -10,7 +9,7 @@ exports.run = function(client, message, args) {
         sql.get(`SELECT * FROM servers WHERE id = "${message.guild.id}"`).then(data => {
             for (var userid = 0; userid < data.usernum; userid++)
             {
-                sql.run(`UPDATE users SET pervcount = ${0} WHERE num = ${userid}`);
+                sql.run(`UPDATE users SET pervcount = 0 WHERE num = ${userid}`);
             }
         });
     }

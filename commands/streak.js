@@ -1,4 +1,3 @@
-const thelist = require('../databases/thelist.json');
 const sql = require("sqlite");
 sql.open("./databases/userdata.sqlite");
 

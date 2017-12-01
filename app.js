@@ -14,12 +14,13 @@ function picture(msg) {
         if (sData.status == "Pervert") {
             sql.run(`UPDATE users SET pervcount = ${sData.pervcount + 1} WHERE id = "${msg.author.id}" AND guild = "${msg.guild.id}"`);
             sql.run(`UPDATE users SET totalperv = ${sData.totalperv + 1} WHERE id = "${msg.author.id}" AND guild = "${msg.guild.id}"`);
+            if (sData.channel == "FALSE")
+                {return;}
             if (sData.channel != "DM") {
                 client.channels.get(sData.channel).send(`<@${msg.author.id}> PERVERT!`);
                 return;
-            } if (sData.channel == "FALSE")
-                {return;}
-            message.author.send(`<@${msg.author.id}> PERVERT!`);
+            }
+            msg.author.send(`<@${msg.author.id}> PERVERT!`);
         }
         //VICTIMS//
         if (sData.status == "Victim") {
@@ -32,12 +33,13 @@ function picture(msg) {
             randomPuppy(sub)
             .then(url => {
                 console.log(url);
+                if (sData.channel == "FALSE")
+                    {return;}
                 if (sData.channel != "DM") {
                     client.channels.get(sData.channel).send(`<@${msg.author.id}> Seems to have requested this? ...\n${url}`);
                     return;
-                } if (sData.channel == "FALSE")
-                    {return;}
-                message.author.send(`<@${msg.author.id}> Seems to have requested this? ...\n${url}`);
+                }
+                msg.author.send(`<@${msg.author.id}> Seems to have requested this? ...\n${url}`);
             })
         }
         //FRIENDS//
@@ -46,12 +48,13 @@ function picture(msg) {
             randomPuppy(sub)
             .then(url => {
                 console.log(url);
+                if (sData.channel == "FALSE")
+                    {return;}
                 if (sData.channel != "DM") {
                     client.channels.get(sData.channel).send(`<@${msg.author.id}> Something to cheer you up!!\n${url}`);
                     return;
-                } if (sData.channel == "FALSE")
-                    {return;}
-                message.author.send(`<@${msg.author.id}> Something to cheer you up!!\n${url}`);
+                }
+                msg.author.send(`<@${msg.author.id}> Something to cheer you up!!\n${url}`);
             })
         }
     });
@@ -67,18 +70,21 @@ client.on("message", message => {
     //Add New Users//
     sql.get(`SELECT * FROM servers WHERE id = "${message.guild.id}"`).then(data => {
         if (!data) {
-            sql.run(`INSERT INTO servers (id, channel, defaultstatus, msghigh, streakhigh, usernum) VALUES (?, ?, ?, ?, ?, ?)`, [`${message.guild.id}`, "DM", "Friend", 20, 3, 1]);
+            var usernum = 0;
+            sql.run("INSERT INTO servers (id, channel, defaultstatus, msghigh, streakhigh, usernum) VALUES (?, ?, ?, ?, ?, ?)", [`${message.guild.id}`, "DM", "Friend", 20, 3, 1]);
+        } else {
+            var usernum = data.usernum;
+            sql.run(`UPDATE servers SET usernum = ${data.usernum + 1} WHERE id = "${message.guild.id}"`);
         }
     }).catch(() => {
-        sql.run(`CREATE TABLE IF NOT EXISTS servers (id TEXT, channel TEXT, defaultstatus TEXT, msghigh INTEGER, streakhigh INTEGER, usernum INTEGER`).then(() => {
-            sql.run(`INSERT INTO servers (id, channel, defaultstatus, msghigh, streakhigh, usernum) VALUES (?, ?, ?, ?, ?, ?)`, [`${message.guild.id}`, "DM", "Friend", 20, 3, 1]);
+        sql.run("CREATE TABLE IF NOT EXISTS servers (id TEXT, channel TEXT, defaultstatus TEXT, msghigh INTEGER, streakhigh INTEGER, usernum INTEGER)").then(() => {
+            sql.run("INSERT INTO servers (id, channel, defaultstatus, msghigh, streakhigh, usernum) VALUES (?, ?, ?, ?, ?, ?)", [`${message.guild.id}`, "DM", "Friend", 20, 3, 1]);
         });
     });
     sql.get(`SELECT * FROM users WHERE id = "${message.author.id}" AND guild = "${message.guild.id}"`).then(data => {
         if (!data) {
             sql.get(`SELECT * FROM servers WHERE id = "${message.guild.id}"`).then(newData => {
-                sql.run(`INSERT INTO users (id, guild, status, msgcount, totalmsg, streak, highstreak, pervcount, totalperv, channel, num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [`${message.author.id}`, `${message.guild.id}`, `${newData.status}`, 1, 1, 1, 1, 0, 0, `${newData.channel}`, newData.usernum]);
-                sql.run(`UPDATE servers SET usernum = ${newData.usernum + 1} WHERE id = "${message.guild.id}"`);
+                sql.run("INSERT INTO users (id, guild, status, msgcount, totalmsg, streak, highstreak, pervcount, totalperv, channel, num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [`${message.author.id}`, `${message.guild.id}`, `${newData.defaultstatus}`, 1, 1, 1, 1, 0, 0, `${newData.channel}`, usernum]);
             });
         } else {
             sql.run(`UPDATE users SET msgcount = ${data.msgcount + 1} WHERE id = "${message.author.id}" AND guild = "${message.guild.id}"`);
@@ -88,14 +94,14 @@ client.on("message", message => {
                 {sql.run(`UPDATE users SET highstreak = ${data.streak} WHERE id = "${message.author.id}" AND guild = "${message.guild.id}"`);}
         }
     }).catch(() => {
-        sql.run(`CREATE TABLE IF NOT EXISTS users (id TEXT, guild TEXT, status TEXT, msgcount INTEGER, totalmsg INTEGER, streak INTEGER, highstreak INTEGER, pervcount INTEGER, totalperv INTEGER, channel TEXT, num INTEGER`).then(() => {
-            sql.run(`INSERT INTO users (id, guild, status, msgcount, totalmsg, streak, highstreak, pervcount, totalperv, channel, num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [`${message.author.id}`, `${message.guild.id}`, "Friend", 1, 1, 1, 1, 0, 0, "DM", 0]);
+        sql.run("CREATE TABLE IF NOT EXISTS users (id TEXT, guild TEXT, status TEXT, msgcount INTEGER, totalmsg INTEGER, streak INTEGER, highstreak INTEGER, pervcount INTEGER, totalperv INTEGER, channel TEXT, num INTEGER)").then(() => {
+            sql.run("INSERT INTO users (id, guild, status, msgcount, totalmsg, streak, highstreak, pervcount, totalperv, channel, num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [`${message.author.id}`, `${message.guild.id}`, "Friend", 1, 1, 1, 1, 0, 0, "DM", 0]);
         });
     });
 
     //Manage Other User's Points//
     sql.get(`SELECT * FROM servers WHERE id = "${message.guild.id}"`).then(data => {
-        for (var userid = 0; userid < data.usernum; userid++)
+        for (var userid = 0; userid < (usernum + 1); userid++)
         {
             sql.get(`SELECT * FROM users WHERE num = ${userid} AND guild = "${message.guild.id}"`).then(newData => {
                 if (newData.id != `${message.author.id}` && newData.msgcount > data.msghigh && newData.streak > data.streakhigh) {
@@ -103,7 +109,7 @@ client.on("message", message => {
                         {sql.run(`UPDATE users SET msgcount = ${newData.msgcount - 1} WHERE num = ${userid} AND guild = "${message.guild.id}"`);}
                     if ((Math.floor(Math.random()*(newData.pervcount)) < (newData.pervcount / (newData.pervcount / Math.pow(newData.pervcount, 2) * 200))))
                         {sql.run(`UPDATE users SET pervcount = ${newData.pervcount - 1} WHERE num = ${userid} AND guild = "${message.guild.id}"`);}
-                    sql.run(`UPDATE users SET streak = ${0} WHERE num = ${userid} AND guild = "${message.guild.id}"`);
+                    sql.run(`UPDATE users SET streak = 0 WHERE num = ${userid} AND guild = "${message.guild.id}"`);
                 }
             });
         }
@@ -118,9 +124,9 @@ client.on("message", message => {
     });
 
     //Manages User Status//
-    if (message.guild.id == settings.tomserver) {
+    if (`${message.guild.id}` == settings.tomserver) {
         sql.get(`SELECT * FROM servers WHERE id = "${message.guild.id}"`).then(data => {
-            for (var userid = 0; userid < data.usernum; userid++) {
+            for (var userid = 0; userid < (usernum + 1); userid++) {
                 sql.get(`SELECT * FROM users WHERE num = ${userid} AND guild = "${message.guild.id}"`).then(newData => {
                     //VICTIMS//
                     if (newData.status == "Victim" && newData.pervcount > 10) {
