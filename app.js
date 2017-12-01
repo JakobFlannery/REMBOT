@@ -70,21 +70,22 @@ client.on("message", message => {
     //Add New Users//
     sql.get(`SELECT * FROM servers WHERE id = "${message.guild.id}"`).then(data => {
         if (!data) {
-            var usernum = 0;
+            usernum = 0;
             sql.run("INSERT INTO servers (id, channel, defaultstatus, msghigh, streakhigh, usernum) VALUES (?, ?, ?, ?, ?, ?)", [`${message.guild.id}`, "DM", "Friend", 20, 3, 1]);
         } else {
-            var usernum = data.usernum;
-            sql.run(`UPDATE servers SET usernum = ${data.usernum + 1} WHERE id = "${message.guild.id}"`);
+            usernum = data.usernum;
         }
     }).catch(() => {
         sql.run("CREATE TABLE IF NOT EXISTS servers (id TEXT, channel TEXT, defaultstatus TEXT, msghigh INTEGER, streakhigh INTEGER, usernum INTEGER)").then(() => {
             sql.run("INSERT INTO servers (id, channel, defaultstatus, msghigh, streakhigh, usernum) VALUES (?, ?, ?, ?, ?, ?)", [`${message.guild.id}`, "DM", "Friend", 20, 3, 1]);
+            usernum = 0;
         });
     });
     sql.get(`SELECT * FROM users WHERE id = "${message.author.id}" AND guild = "${message.guild.id}"`).then(data => {
         if (!data) {
             sql.get(`SELECT * FROM servers WHERE id = "${message.guild.id}"`).then(newData => {
                 sql.run("INSERT INTO users (id, guild, status, msgcount, totalmsg, streak, highstreak, pervcount, totalperv, channel, num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [`${message.author.id}`, `${message.guild.id}`, `${newData.defaultstatus}`, 1, 1, 1, 1, 0, 0, `${newData.channel}`, usernum]);
+                sql.run(`UPDATE servers SET usernum = ${newData.usernum + 1} WHERE id = "${message.guild.id}"`);
             });
         } else {
             sql.run(`UPDATE users SET msgcount = ${data.msgcount + 1} WHERE id = "${message.author.id}" AND guild = "${message.guild.id}"`);
@@ -96,6 +97,7 @@ client.on("message", message => {
     }).catch(() => {
         sql.run("CREATE TABLE IF NOT EXISTS users (id TEXT, guild TEXT, status TEXT, msgcount INTEGER, totalmsg INTEGER, streak INTEGER, highstreak INTEGER, pervcount INTEGER, totalperv INTEGER, channel TEXT, num INTEGER)").then(() => {
             sql.run("INSERT INTO users (id, guild, status, msgcount, totalmsg, streak, highstreak, pervcount, totalperv, channel, num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [`${message.author.id}`, `${message.guild.id}`, "Friend", 1, 1, 1, 1, 0, 0, "DM", 0]);
+            sql.run(`UPDATE servers SET usernum = ${newData.usernum + 1} WHERE id = "${message.guild.id}"`);
         });
     });
 
